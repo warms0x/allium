@@ -1,28 +1,31 @@
-extern crate x25519_dalek;
-extern crate rand;
-extern crate base32;
-extern crate crypto;
 
 use crypto::digest::Digest;
 use crypto::sha3::Sha3;
-
+use regex;
 use x25519_dalek::EphemeralSecret;
 use x25519_dalek::PublicKey;
 
 fn main() {
+    let mut found = false;
     let mut csprng = rand::thread_rng();
-    let     secret = EphemeralSecret::new(&mut csprng);
-    let     public = PublicKey::from(&secret);
+    let matcher = regex::Regex::new("(?i)^test").expect("Failed to make regex");
 
-    let secret = secret.diffie_hellman(&public);
+    while ! found {
+        let     secret = EphemeralSecret::new(&mut csprng);
+        let     public = PublicKey::from(&secret);
 
+        let b32_public = base32::encode(base32::Alphabet::RFC4648 { padding: false }, public.as_bytes());
 
-    let b32_secret = base32::encode(base32::Alphabet::RFC4648 { padding: false }, secret.as_bytes());
-    let b32_public = base32::encode(base32::Alphabet::RFC4648 { padding: false }, public.as_bytes());
+        if matcher.is_match(&b32_public) {
+            found = true;
 
-    println!("secret: {:?}", b32_secret);
-    println!("public: {:?}", b32_public);
-    println!("hostname: {}", format_hostname(public.as_bytes().to_vec()));
+            let secret = secret.diffie_hellman(&public);
+            let b32_secret = base32::encode(base32::Alphabet::RFC4648 { padding: false }, secret.as_bytes());
+            println!("secret: {}", b32_secret);
+            println!("public: {}", b32_public);
+            println!("hostname: {}", format_hostname(public.as_bytes().to_vec()));
+       }
+    }
 }
 
 /**

@@ -5,7 +5,8 @@ authors = ["warms0x <warms0x@riseup.net>"]
 edition = "2018"
 
 [dependencies]
-x25519-dalek = "~0.6.0"
-rand = "~0.7.3"
 base32 = "~0.3.1"
+rand = "~0.7.3"
+regex = "1"
 rust-crypto = "~0.2.36"
+x25519-dalek = "~0.6.0"
